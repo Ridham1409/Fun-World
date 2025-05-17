@@ -4,8 +4,18 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { toast } from '@/hooks/use-toast';
+import { Dices, Dice1, Dice2, Dice3, Dice4, Dice5, Dice6 } from 'lucide-react';
 
 type DieType = 4 | 6 | 8 | 10 | 12 | 20;
+
+interface DiceRoll {
+  dice: number;
+  type: DieType;
+  results: number[];
+  total: number;
+  timestamp: Date;
+}
 
 const DiceRoller = () => {
   const [numberOfDice, setNumberOfDice] = useState<number>(1);
@@ -13,8 +23,9 @@ const DiceRoller = () => {
   const [results, setResults] = useState<number[]>([]);
   const [total, setTotal] = useState<number>(0);
   const [isRolling, setIsRolling] = useState<boolean>(false);
-  const [rollHistory, setRollHistory] = useState<{ dice: number, type: DieType, results: number[], total: number }[]>([]);
-
+  const [rollHistory, setRollHistory] = useState<DiceRoll[]>([]);
+  const [showRules, setShowRules] = useState<boolean>(false);
+  
   const diceTypes: DieType[] = [4, 6, 8, 10, 12, 20];
 
   // Roll the dice
@@ -22,6 +33,11 @@ const DiceRoller = () => {
     if (isRolling) return;
     
     setIsRolling(true);
+    
+    // Sound effect
+    const audio = new Audio('https://cdn.pixabay.com/download/audio/2022/03/10/audio_81cea8b060.mp3?filename=dice-roll-41072.mp3');
+    audio.volume = 0.5;
+    audio.play().catch(e => console.log("Audio play failed:", e));
     
     // Fake rolling animation with changing values
     let rollCount = 0;
@@ -42,15 +58,24 @@ const DiceRoller = () => {
         setIsRolling(false);
         
         // Add to history
-        setRollHistory(prev => [
-          {
-            dice: numberOfDice,
-            type: dieType,
-            results: finalResults,
-            total: finalTotal
-          },
-          ...prev.slice(0, 9) // Keep only the last 10 rolls
-        ]);
+        const newRoll: DiceRoll = {
+          dice: numberOfDice,
+          type: dieType,
+          results: finalResults,
+          total: finalTotal,
+          timestamp: new Date()
+        };
+        
+        setRollHistory(prev => [newRoll, ...prev.slice(0, 9)]);
+        
+        // Show toast for good rolls
+        if (finalTotal >= dieType * numberOfDice * 0.8) {
+          toast({
+            title: "Excellent Roll!",
+            description: `You rolled a total of ${finalTotal}`,
+            variant: "default",
+          });
+        }
       }
     }, 100);
   };
@@ -68,108 +93,112 @@ const DiceRoller = () => {
   // Clear history
   const clearHistory = () => {
     setRollHistory([]);
+    toast({
+      title: "History Cleared",
+      description: "All previous rolls have been cleared.",
+      variant: "default",
+    });
+  };
+
+  // Format time for history
+  const formatTime = (date: Date) => {
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  };
+
+  // Get die icon based on value for d6
+  const getDieIcon = (value: number) => {
+    if (dieType !== 6) return null;
+    
+    switch(value) {
+      case 1: return <Dice1 className="w-8 h-8" />;
+      case 2: return <Dice2 className="w-8 h-8" />;
+      case 3: return <Dice3 className="w-8 h-8" />;
+      case 4: return <Dice4 className="w-8 h-8" />;
+      case 5: return <Dice5 className="w-8 h-8" />;
+      case 6: return <Dice6 className="w-8 h-8" />;
+      default: return null;
+    }
   };
 
   // Die face renderer
   const renderDieFace = (value: number, dieType: DieType, index: number) => {
+    const dieIcon = getDieIcon(value);
     const style = isRolling ? "animate-dice-roll" : "";
     
-    let dots = [];
-    if (dieType === 6) {
-      // For D6, we can show dots like on traditional dice
-      switch(value) {
-        case 1:
-          dots = ['center'];
-          break;
-        case 2:
-          dots = ['top-right', 'bottom-left'];
-          break;
-        case 3:
-          dots = ['top-right', 'center', 'bottom-left'];
-          break;
-        case 4:
-          dots = ['top-left', 'top-right', 'bottom-left', 'bottom-right'];
-          break;
-        case 5:
-          dots = ['top-left', 'top-right', 'center', 'bottom-left', 'bottom-right'];
-          break;
-        case 6:
-          dots = ['top-left', 'top-right', 'middle-left', 'middle-right', 'bottom-left', 'bottom-right'];
-          break;
+    // For D6, we can show dots or icons
+    if (dieType === 6 && dieIcon) {
+      return (
+        <div 
+          key={index}
+          className={`w-20 h-20 bg-white rounded-lg shadow-lg flex items-center justify-center ${style} transform transition-transform hover:rotate-12`}
+          style={isRolling ? { animation: "spin 0.5s ease-in-out" } : {}}
+        >
+          {dieIcon}
+        </div>
+      );
+    }
+    
+    // Different colors for different dice types
+    const colors: Record<DieType, string> = {
+      4: 'bg-red-500 text-white',
+      6: 'bg-blue-500 text-white',
+      8: 'bg-green-500 text-white',
+      10: 'bg-yellow-500 text-black',
+      12: 'bg-purple-500 text-white',
+      20: 'bg-pink-500 text-white'
+    };
+
+    return (
+      <div 
+        key={index}
+        className={`w-20 h-20 ${colors[dieType]} rounded-lg shadow-lg flex items-center justify-center font-bold text-3xl ${style} transform transition-transform hover:scale-110`}
+        style={isRolling ? { animation: "spin 0.5s ease-in-out" } : {}}
+      >
+        {value}
+      </div>
+    );
+  };
+
+  // Add CSS for animation
+  useEffect(() => {
+    const styleEl = document.createElement('style');
+    styleEl.innerHTML = `
+      @keyframes spin {
+        0% { transform: rotate(0deg) translateY(0); }
+        25% { transform: rotate(90deg) translateY(-20px); }
+        50% { transform: rotate(180deg) translateY(0); }
+        75% { transform: rotate(270deg) translateY(-10px); }
+        100% { transform: rotate(360deg) translateY(0); }
       }
-      
-      return (
-        <div 
-          key={index}
-          className={`w-20 h-20 bg-white rounded-lg shadow-lg flex items-center justify-center p-2 relative ${style}`}
-          style={{transform: `rotate(${Math.random() * 360}deg)`}}
-        >
-          {dots.map((position, i) => (
-            <span
-              key={i}
-              className={`absolute w-3 h-3 bg-black rounded-full ${getPositionClass(position)}`}
-            ></span>
-          ))}
-        </div>
-      );
-    } else {
-      // For other dice, we show the number
-      return (
-        <div 
-          key={index}
-          className={`dice ${style} ${getDieShapeClass(dieType)}`}
-          style={{transform: `rotate(${Math.random() * 360}deg)`}}
-        >
-          {value}
-        </div>
-      );
-    }
-  };
+      .animate-dice-roll {
+        animation: spin 0.5s ease-in-out;
+      }
+    `;
+    document.head.appendChild(styleEl);
 
-  // Helper function to get dot position class
-  const getPositionClass = (position: string): string => {
-    switch(position) {
-      case 'top-left': return 'top-2 left-2';
-      case 'top-right': return 'top-2 right-2';
-      case 'middle-left': return 'top-1/2 -translate-y-1/2 left-2';
-      case 'middle-right': return 'top-1/2 -translate-y-1/2 right-2';
-      case 'center': return 'top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2';
-      case 'bottom-left': return 'bottom-2 left-2';
-      case 'bottom-right': return 'bottom-2 right-2';
-      default: return '';
-    }
-  };
-
-  // Helper function to get die shape class based on type
-  const getDieShapeClass = (type: DieType): string => {
-    switch(type) {
-      case 4: return 'bg-red-500 text-white clip-triangle';
-      case 8: return 'bg-green-500 text-white clip-diamond';
-      case 10: return 'bg-blue-500 text-white rounded-full';
-      case 12: return 'bg-yellow-500 text-white rounded-xl';
-      case 20: return 'bg-purple-500 text-white clip-pentagon';
-      default: return 'bg-white'; // D6
-    }
-  };
+    return () => {
+      document.head.removeChild(styleEl);
+    };
+  }, []);
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-gradient-to-b from-purple-50 to-purple-100">
       <Header />
       
       <main className="flex-grow container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold text-center mb-8">Dice Roller</h1>
+        <h1 className="text-3xl md:text-4xl font-bold text-center mb-8 text-game-primary">Virtual Dice Roller</h1>
         
-        <div className="max-w-4xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
+        <div className="max-w-4xl mx-auto bg-white shadow-xl rounded-lg overflow-hidden">
           {/* Controls */}
-          <div className="bg-game-primary text-white p-4">
+          <div className="bg-game-primary text-white p-6">
             <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-              <div className="flex items-center gap-4">
-                <div className="w-32">
+              <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
+                <div className="w-full sm:w-32">
                   <Select
                     onValueChange={handleNumberOfDiceChange}
                     defaultValue="1"
                   >
-                    <SelectTrigger id="number-of-dice">
+                    <SelectTrigger id="number-of-dice" className="bg-white text-game-primary">
                       <SelectValue placeholder="# of Dice" />
                     </SelectTrigger>
                     <SelectContent position="popper">
@@ -182,12 +211,12 @@ const DiceRoller = () => {
                   </Select>
                 </div>
                 
-                <div className="w-32">
+                <div className="w-full sm:w-32">
                   <Select
                     onValueChange={handleDieTypeChange}
                     defaultValue="6"
                   >
-                    <SelectTrigger id="die-type">
+                    <SelectTrigger id="die-type" className="bg-white text-game-primary">
                       <SelectValue placeholder="Die Type" />
                     </SelectTrigger>
                     <SelectContent position="popper">
@@ -205,8 +234,9 @@ const DiceRoller = () => {
                 onClick={rollDice} 
                 disabled={isRolling}
                 size="lg"
-                className="bg-white text-game-primary hover:bg-gray-100 hover:text-game-secondary"
+                className="w-full sm:w-auto bg-white text-game-primary hover:bg-gray-100 hover:text-game-secondary flex items-center gap-2"
               >
+                <Dices className="h-5 w-5" />
                 {isRolling ? 'Rolling...' : `Roll ${numberOfDice}d${dieType}`}
               </Button>
             </div>
@@ -214,23 +244,24 @@ const DiceRoller = () => {
           
           {/* Dice Display */}
           <div className="p-6">
-            <div className="flex flex-wrap justify-center gap-4 mb-6">
+            <div className="flex flex-wrap justify-center gap-6 mb-8 min-h-[100px]">
               {results.length > 0 ? (
                 results.map((result, index) => renderDieFace(result, dieType, index))
               ) : (
-                <div className="dice bg-gray-200 flex items-center justify-center">
-                  ?
+                <div className="flex items-center justify-center text-gray-400">
+                  <Dices className="h-16 w-16 mr-2" />
+                  <span className="text-xl">Click Roll to start</span>
                 </div>
               )}
             </div>
             
             {/* Result */}
             {results.length > 0 && (
-              <div className="text-center mb-6">
-                <div className="text-2xl font-bold">
+              <div className="text-center mb-8 p-4 bg-gray-50 rounded-lg">
+                <div className="text-3xl font-bold text-game-primary">
                   Total: {total}
                 </div>
-                <div className="text-sm text-gray-500">
+                <div className="text-sm text-gray-500 mt-1">
                   {results.join(' + ')} = {total}
                 </div>
               </div>
@@ -239,33 +270,36 @@ const DiceRoller = () => {
             {/* History */}
             {rollHistory.length > 0 && (
               <div className="mt-8">
-                <div className="flex justify-between items-center mb-2">
-                  <h3 className="text-lg font-semibold">Roll History</h3>
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="text-xl font-semibold text-gray-700">Roll History</h3>
                   <Button 
                     onClick={clearHistory} 
                     variant="outline" 
                     size="sm"
+                    className="border-red-300 text-red-500 hover:bg-red-50"
                   >
-                    Clear
+                    Clear History
                   </Button>
                 </div>
-                <div className="border rounded-md overflow-hidden">
+                <div className="border rounded-md overflow-hidden shadow-sm">
                   <table className="w-full">
-                    <thead className="bg-gray-50">
+                    <thead className="bg-gray-100">
                       <tr>
-                        <th className="px-4 py-2 text-left text-sm font-medium text-gray-500">Roll</th>
-                        <th className="px-4 py-2 text-left text-sm font-medium text-gray-500">Dice</th>
-                        <th className="px-4 py-2 text-left text-sm font-medium text-gray-500">Results</th>
-                        <th className="px-4 py-2 text-left text-sm font-medium text-gray-500">Total</th>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">Roll #</th>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">Time</th>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">Dice</th>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">Results</th>
+                        <th className="px-4 py-3 text-left text-sm font-medium text-gray-600">Total</th>
                       </tr>
                     </thead>
                     <tbody>
                       {rollHistory.map((roll, index) => (
-                        <tr key={index} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                          <td className="px-4 py-2 text-sm">#{rollHistory.length - index}</td>
-                          <td className="px-4 py-2 text-sm">{roll.dice}d{roll.type}</td>
-                          <td className="px-4 py-2 text-sm">{roll.results.join(', ')}</td>
-                          <td className="px-4 py-2 text-sm font-medium">{roll.total}</td>
+                        <tr key={index} className={index % 2 === 0 ? 'bg-white hover:bg-blue-50' : 'bg-gray-50 hover:bg-blue-50'}>
+                          <td className="px-4 py-3 text-sm">#{rollHistory.length - index}</td>
+                          <td className="px-4 py-3 text-sm">{formatTime(roll.timestamp)}</td>
+                          <td className="px-4 py-3 text-sm">{roll.dice}d{roll.type}</td>
+                          <td className="px-4 py-3 text-sm">{roll.results.join(', ')}</td>
+                          <td className="px-4 py-3 text-sm font-medium text-game-primary">{roll.total}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -276,16 +310,56 @@ const DiceRoller = () => {
           </div>
         </div>
         
-        {/* Instructions */}
+        {/* Rules & Instructions */}
         <div className="max-w-4xl mx-auto mt-8 bg-white shadow-lg rounded-lg p-6">
-          <h2 className="text-2xl font-semibold mb-4">How to Use the Dice Roller</h2>
-          <ul className="list-disc pl-6 space-y-2">
-            <li>Select the number of dice you want to roll (1-5)</li>
-            <li>Choose the type of die (D4, D6, D8, D10, D12, D20)</li>
-            <li>Click the "Roll" button to roll the dice</li>
-            <li>See the results and total sum of your roll</li>
-            <li>View your roll history at the bottom</li>
-          </ul>
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-2xl font-semibold text-gray-800">How to Use the Dice Roller</h2>
+            <Button 
+              variant="ghost" 
+              onClick={() => setShowRules(!showRules)}
+              className="text-game-primary"
+            >
+              {showRules ? "Hide Details" : "Show Details"}
+            </Button>
+          </div>
+          
+          {showRules ? (
+            <div className="space-y-4 animate-fade-in">
+              <p className="text-gray-600">
+                This virtual dice roller simulates rolling physical dice for tabletop games, 
+                role-playing games, or any other game that requires dice.
+              </p>
+              
+              <h3 className="text-xl font-medium text-gray-700 mt-4">Instructions:</h3>
+              <ul className="list-disc pl-6 space-y-2 text-gray-600">
+                <li>Select the number of dice you want to roll (1-5)</li>
+                <li>Choose the type of die (D4, D6, D8, D10, D12, D20)</li>
+                <li>Click the "Roll" button to roll the dice</li>
+                <li>Watch the animation and see your results</li>
+                <li>View your roll history at the bottom</li>
+              </ul>
+              
+              <h3 className="text-xl font-medium text-gray-700 mt-4">Dice Types:</h3>
+              <ul className="list-disc pl-6 space-y-2 text-gray-600">
+                <li><strong>D4:</strong> 4-sided die (tetrahedron) - values 1-4</li>
+                <li><strong>D6:</strong> 6-sided die (cube) - values 1-6</li>
+                <li><strong>D8:</strong> 8-sided die (octahedron) - values 1-8</li>
+                <li><strong>D10:</strong> 10-sided die (pentagonal trapezohedron) - values 1-10</li>
+                <li><strong>D12:</strong> 12-sided die (dodecahedron) - values 1-12</li>
+                <li><strong>D20:</strong> 20-sided die (icosahedron) - values 1-20</li>
+              </ul>
+              
+              <div className="bg-purple-50 p-4 rounded-lg mt-4">
+                <p className="text-purple-800 font-medium">Tip: You can roll multiple dice at once for more complex game mechanics!</p>
+              </div>
+            </div>
+          ) : (
+            <ul className="list-disc pl-6 space-y-2 text-gray-600">
+              <li>Select the number of dice (1-5) and the die type (D4-D20)</li>
+              <li>Click "Roll" to see your results</li>
+              <li>View your roll history below</li>
+            </ul>
+          )}
         </div>
       </main>
       

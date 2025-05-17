@@ -16,20 +16,13 @@ const Index = () => {
     },
     {
       id: 2,
-      title: 'Number Guessing',
-      description: 'Guess the secret number within a limited number of tries. Get hints along the way!',
-      imageSrc: 'https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&q=80',
-      path: '/number-guess',
-    },
-    {
-      id: 3,
       title: 'Dice Roller',
       description: 'Roll virtual dice with beautiful animations. Perfect for board games!',
       imageSrc: 'https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&fit=crop&q=80',
       path: '/dice-roller',
     },
     {
-      id: 4,
+      id: 3,
       title: 'Memory Game',
       description: 'Test your memory by matching pairs of cards in this classic concentration game.',
       imageSrc: 'https://images.unsplash.com/photo-1649972904349-6e44c42644a7?auto=format&fit=crop&q=80',
@@ -64,7 +57,7 @@ const Index = () => {
         <section id="games" className="game-section py-12">
           <div className="container mx-auto px-4">
             <h2 className="text-3xl font-bold mb-8 text-center">Featured Games</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {games.map((game) => (
                 <GameCard
                   key={game.id}

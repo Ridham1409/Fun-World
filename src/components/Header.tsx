@@ -10,7 +10,6 @@ const Header: React.FC = () => {
         <nav className="hidden md:flex space-x-6">
           <Link to="/" className="hover:text-game-light transition">Home</Link>
           <Link to="/rock-paper-scissors" className="hover:text-game-light transition">Rock Paper Scissors</Link>
-          <Link to="/number-guess" className="hover:text-game-light transition">Number Guess</Link>
           <Link to="/dice-roller" className="hover:text-game-light transition">Dice Roller</Link>
           <Link to="/memory-game" className="hover:text-game-light transition">Memory Game</Link>
         </nav>
