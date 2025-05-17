@@ -3,6 +3,7 @@ import React from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import GameCard from '../components/GameCard';
+import InteractiveBanner from '../components/InteractiveBanner';
 
 const Index = () => {
   // Game data for our cards
@@ -27,6 +28,13 @@ const Index = () => {
       description: 'Test your memory by matching pairs of cards in this classic concentration game.',
       imageSrc: 'https://images.unsplash.com/photo-1649972904349-6e44c42644a7?auto=format&fit=crop&q=80',
       path: '/memory-game',
+    },
+    {
+      id: 4,
+      title: 'Tic Tac Toe',
+      description: 'The classic game of X's and O's. Challenge a friend or play against yourself.',
+      imageSrc: 'https://images.unsplash.com/photo-1606167668584-78701c57f13d?auto=format&fit=crop&q=80',
+      path: '/tic-tac-toe',
     }
   ];
 
@@ -35,29 +43,14 @@ const Index = () => {
       <Header />
       
       <main className="flex-grow">
-        {/* Hero Section */}
-        <section className="bg-game-primary text-white py-16 relative overflow-hidden">
-          <div className="absolute inset-0 opacity-10">
-            <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&q=80')] bg-no-repeat bg-cover"></div>
-          </div>
-          <div className="container mx-auto px-4 relative z-10">
-            <div className="max-w-3xl">
-              <h1 className="text-4xl md:text-6xl font-bold mb-4 animate-fade-in">Welcome to Fun Games Hub</h1>
-              <p className="text-xl mb-8 opacity-90 animate-fade-in" style={{ animationDelay: '0.2s' }}>
-                Explore our collection of interactive games designed to challenge your skills and provide hours of entertainment!
-              </p>
-              <a href="#games" className="game-button inline-block animate-fade-in" style={{ animationDelay: '0.4s' }}>
-                Explore Games
-              </a>
-            </div>
-          </div>
-        </section>
+        {/* Interactive Banner Section */}
+        <InteractiveBanner />
         
         {/* Games Section */}
         <section id="games" className="game-section py-12">
           <div className="container mx-auto px-4">
             <h2 className="text-3xl font-bold mb-8 text-center">Featured Games</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
               {games.map((game) => (
                 <GameCard
                   key={game.id}
