@@ -6,34 +6,34 @@ import GameCard from '../components/GameCard';
 import InteractiveBanner from '../components/InteractiveBanner';
 
 const Index = () => {
-  // Game data for our cards
+  // Game data for our cards with updated custom images
   const games = [
     {
       id: 1,
       title: 'Rock Paper Scissors',
       description: 'Play the classic game of chance against the computer. Can you outsmart the AI?',
-      imageSrc: 'https://images.unsplash.com/photo-1581090464777-f3220bbe1b8b?auto=format&fit=crop&q=80',
+      imageSrc: '/lovable-uploads/94beb694-7580-496b-92e8-6121c6da4f9e.png',
       path: '/rock-paper-scissors',
     },
     {
       id: 2,
       title: 'Dice Roller',
       description: 'Roll virtual dice with beautiful animations. Perfect for board games!',
-      imageSrc: 'https://images.unsplash.com/photo-1500375592092-40eb2168fd21?auto=format&fit=crop&q=80',
+      imageSrc: '/lovable-uploads/5c48c2d4-9af3-419b-a6ca-79a144b4c015.png',
       path: '/dice-roller',
     },
     {
       id: 3,
       title: 'Memory Game',
       description: 'Test your memory by matching pairs of cards in this classic concentration game.',
-      imageSrc: 'https://images.unsplash.com/photo-1649972904349-6e44c42644a7?auto=format&fit=crop&q=80',
+      imageSrc: '/lovable-uploads/72ca0b43-6534-488f-8a0a-772398110cc6.png',
       path: '/memory-game',
     },
     {
       id: 4,
       title: 'Tic Tac Toe',
       description: 'The classic game of Xs and Os. Challenge a friend or play against yourself.',
-      imageSrc: 'https://images.unsplash.com/photo-1606167668584-78701c57f13d?auto=format&fit=crop&q=80',
+      imageSrc: '/lovable-uploads/b77f359a-5b0d-4772-985b-622ef62a9b3f.png',
       path: '/tic-tac-toe',
     }
   ];
