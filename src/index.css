@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -136,15 +135,65 @@
 }
 
 .memory-card-back {
-  @apply bg-game-primary transform rotate-y-180;
+  @apply transform rotate-y-180;
 }
 
 .flipped .memory-card-inner {
   @apply transform rotate-y-180;
 }
 
+.matched .memory-card-inner {
+  @apply border-green-500;
+}
+
 .dice {
   @apply w-20 h-20 bg-white rounded-lg shadow-lg flex items-center justify-center font-bold text-3xl;
+}
+
+/* Background animation elements */
+.bubble {
+  @apply absolute rounded-full bg-opacity-30;
+  width: var(--size);
+  height: var(--size);
+  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.3), rgba(var(--hue), 50%, 80%, 0.2));
+  left: var(--left);
+  animation: float var(--speed) ease-in-out infinite;
+  bottom: -100px;
+}
+
+.light-streak {
+  @apply absolute rounded-full bg-opacity-30;
+  width: var(--size);
+  height: 2px;
+  background: linear-gradient(var(--angle), transparent, hsl(var(--hue), 100%, 85%, var(--opacity)), transparent);
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%) rotate(var(--angle));
+  animation: pulse var(--speed) ease-in-out infinite;
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(0) rotate(0deg) scale(1);
+  }
+  50% {
+    transform: translateY(-300px) rotate(180deg) scale(1.1);
+  }
+  100% {
+    transform: translateY(-600px) rotate(360deg) scale(1);
+    opacity: 0;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: var(--opacity);
+    transform: translate(-50%, -50%) rotate(var(--angle)) scale(1);
+  }
+  50% {
+    opacity: calc(var(--opacity) * 0.6);
+    transform: translate(-50%, -50%) rotate(var(--angle)) scale(1.2);
+  }
 }
 
 @layer utilities {
