@@ -32,7 +32,7 @@ const Index = () => {
     {
       id: 4,
       title: 'Tic Tac Toe',
-      description: 'The classic game of X's and O's. Challenge a friend or play against yourself.',
+      description: 'The classic game of Xs and Os. Challenge a friend or play against yourself.',
       imageSrc: 'https://images.unsplash.com/photo-1606167668584-78701c57f13d?auto=format&fit=crop&q=80',
       path: '/tic-tac-toe',
     }
